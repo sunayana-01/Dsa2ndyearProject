@@ -53,7 +53,7 @@ int ind = 0;
 cust_NODE createc(cust_NODE mem, int r){
     if(mem==NULL){
         MALLOC(mem, sizeof(struct account), cust_NODE);
-        printf("Enter the data:\n");
+        printf("\nEnter the data:\n");
         printf("Enter your name:\t");
         scanf("%s",mem->cust_name);
         printf("Enter your address:\n");
@@ -120,18 +120,12 @@ int searchi(item_NODE ite, int key){
         printf("In stock: %d\n",ite->stock);
         scanf("%d",&q);
         if(q<=ite->stock){
-            purch temp = current->purchase[val];
+            MALLOC(current->purchase[val], sizeof(struct purchase), purch);
             ite->stock-=q;
             cart+=q;
-            printf("1");
-            temp->number=q;
-            printf("1");
-            strcpy(temp->purchase ,ite->item_name);
-            printf("1");
             current->purchase[val]->number=q;
-            printf("1");
+            strcpy(current->purchase[val]->purchase ,ite->item_name);
             current->purchase[val]->price=ite->price;
-            printf("1");
             current->purchase[val]->tprice = q*ite->price;
             val++;
             return 1;
@@ -160,7 +154,7 @@ int searchc(cust_NODE cust, int key){
 
 void preorderi(item_NODE ite){
     if(ite!=NULL){
-        printf("%s\t\t%d\t\t%d\t\t%d\n",ite->item_name, ite->item_key, ite->stock, ite->price);
+        printf("%s\t\t\t%d\t\t\t%d\t\t\t%d\n",ite->item_name, ite->item_key, ite->stock, ite->price);
         preorderi(ite->left);
         preorderi(ite->right);
     }
@@ -171,24 +165,25 @@ int main(){
     cust_NODE member = NULL;
     item_NODE item = NULL;
     int itemkey, memberkey;
-    printf("*--------------------------------------------------------------------------------------------------------------*\n");
-    printf("                                  WELCOME TO ONLINE SHOPPING MART\n");
-    printf("                                                                          Cart=%d\n", cart);
     while(!fdone){
         done=0;
         ind = 0;
         val = 0;
-        printf("Enter the following key: \n1.Signup\n2.Login\n3.Exit\n");
+        printf("*--------------------------------------------------------------------------------------------------------------*\n");
+        printf("                                  WELCOME TO ONLINE SHOPPING MART\n");
+        printf("                                                                          Cart=%d\n", cart);
+        printf("\n");
+        printf("Enter the following key: \n1.Signup\n2.Login\n3.Exit\nKey:\t");
         scanf("%d", &i);
         switch(i){
             case 1: printf("Enter the following details:");
                     member = createc(member, 5467);
-                    printf("Account created successfully.\n");
-                    printf("dgshja\n");
+                    printf("Account created successfully.\n\n");
+                    chcc:
                         if(current->admin==1){
                             while(!done){
                                 printf("Enter the key for the following operations:\n");
-                                printf("1.Profile\n2.Add Item\n3.Modify Price\n4.View Items\n5.Logout\n");
+                                printf("1.Profile\n2.Add Item\n3.Modify Price\n4.View Items\n5.Logout\nKey:\t");
                                 scanf("%d",&j);
                                 switch (j){
                                     case 1: printf("Details:\n");
@@ -203,7 +198,7 @@ int main(){
                                             preorderi(item);
                                             break;
                                     case 5: done = 1;
-                                            system("clear");
+                                            printf("\e[1;1H\e[2J");
                                             break;
                                     default: printf("Invalid Option.\n");
                                 }
@@ -212,7 +207,7 @@ int main(){
                         else{
                             while(!done){
                                 printf("Enter the key for the following operations:\n");
-                                printf("1.Profile\n2.View Items\n3.View your cart\n4.Add Item\n5.Proceed to pay\n6.Logout\n");
+                                printf("1.Profile\n2.View Items\n3.View your cart\n4.Add Item\n5.Proceed to pay\n6.Logout\nKey:\t");
                                 scanf("%d",&j);
                                 switch(j){
                                     case 1: printf("Details:\n");
@@ -225,9 +220,9 @@ int main(){
                                             break;
                                     case 3: printf("Items in your cart:\n");
                                             printf("Item Name\t\tQuantity\t\tPrice Value per product\tTotal price\n");
-                                            for(int k=0; k<=val; k++){
-                                                printf("%s\t\t%d\t\t%d\t\t%d\n",current->purchase[k]->purchase, current->purchase[k]->number,
-                                                current->purchase[k]->price, current->purchase[k]->tprice);
+                                            for(int k=0; k<val; k++){
+                                                purch temp = current->purchase[k];
+                                                printf("%s\t\t%d\t\t%d\t\t%d\n",temp->purchase, temp->number, temp->price, temp->tprice);
                                             }
                                             printf("End of cart.\n");
                                             break;
@@ -235,17 +230,17 @@ int main(){
                                             scanf("%d", &itemkey);
                                             flag = searchi(item, itemkey);
                                             if(flag!=1)
-                                                printf("Invalid item key or item not available.\n");
+                                                printf("Invalid item key or item not available.\n\n");
                                             else
-                                                printf("Item Successfully added to cart");
+                                                printf("Item Successfully added to cart\n\n");
                                             break;
                                     case 5: printf("Total amount payable");
                                             int total = 0;
                                             printf("Item Name\t\tQuantity\t\tPrice Value per product\tTotal price\n");
-                                            for(int k=0; k<=val; k++){
-                                                printf("%s\t\t%d\t\t%d\t\t%d\n",current->purchase[k]->purchase, current->purchase[k]->number,
-                                                current->purchase[k]->price, current->purchase[k]->tprice);
-                                                total += current->purchase[k]->tprice;
+                                            for(int k=0; k<val; k++){
+                                                purch temp = current->purchase[k];
+                                                printf("%s\t\t%d\t\t%d\t\t%d\n",temp->purchase, temp->number, temp->price, temp->tprice);
+                                                total += temp->tprice;
                                             }
                                             printf("Total cost: %d\n",total);
                                             printf("Enter your payment method:\n");
@@ -257,7 +252,7 @@ int main(){
                                                 printf("Enter your card details.\n");
                                             break;
                                     case 6: done = 1;
-                                            system("clear");
+                                            printf("\e[1;1H\e[2J");
                                             break;
                                     default: printf("Invalid Option.\n");
                                 }
@@ -271,6 +266,8 @@ int main(){
                     flag = searchc(member, memberkey);
                     if(flag!=1)
                         printf("Invalid credentials\n");
+                    else
+                        goto chcc;
                     break;
 
             case 3: {
