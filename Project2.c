@@ -13,6 +13,7 @@
         exit(1);\
         }
 
+//Cart of customer
 struct purchase{
     char purchase[30];
     int price;
@@ -21,9 +22,11 @@ struct purchase{
 };
 typedef struct purchase* purch;
 
+//User account
 struct account{
     int cust_key; 
     char cust_name[30];
+    char password[30];
     char address[40];
     int pin;
     int mobno;
@@ -34,6 +37,7 @@ struct account{
     struct account* right;
 };
 
+//Item node
 struct item{
     int item_key;
     char item_name[30];
@@ -49,13 +53,171 @@ int cart=0, val=0;
 cust_NODE current = NULL;
 int ind = 0;
 
-//Defination Section
+//Functions Defination Section
+int getid();
+void display();
+cust_NODE createc(cust_NODE, int);
+item_NODE createi(item_NODE, int);
+int searchi(item_NODE, int);
+int searchc(cust_NODE, int);
+void viewitems(item_NODE);
+void payable();
+
+
+int main(){
+    int option, j, flag, done=0, pay, fdone=0;
+    cust_NODE member = NULL;
+    item_NODE item = NULL;
+    int itemkey, memberkey;
+    while(!fdone){
+        done=0;
+        ind = 0;
+        val = 0;
+        printf("*--------------------------------------------------------------------------------------------------------------*\n");
+        printf("                                  WELCOME TO ONLINE SHOPPING MART\n");
+        printf("                                                                          Cart=%d\n", cart);
+        printf("\n");
+        printf("Enter the following key: \n1.Signup\n2.Login\n3.Exit\nKey:\t");
+        scanf("%d", &option);
+        switch(option){
+            case 1: printf("Enter the following details:");
+                    member = createc(member, getid());
+                    printf("Account created successfully.\n\n");
+                    chcc:
+                        if(current->admin==1){
+                            while(!done){
+                                printf("Enter the key for the following operations:\n");
+                                printf("1.Profile\n2.Add Item\n3.View Items\n4.Logout\nKey:\t");
+                                scanf("%d",&j);
+                                switch (j){
+                                    case 1: printf("\nDetails:\n");
+                                            display();
+                                            break;
+                                    case 2: 
+                                            item = createi(item, getid());
+                                            if(item!=NULL)
+                                                printf("item added successfully\n\n");
+                                            break;
+                                    case 3: printf("Key\t\tItem Name\t\tStock\t\tPrice Value\n");
+                                            viewitems(item);
+                                            break;
+                                    case 4: done = 1;
+                                            printf("\e[1;1H\e[2J");
+                                            break;
+                                    default: printf("Invalid Option.\n");
+                                }
+                            }
+                        }
+                        else{
+                            while(!done){
+                                printf("Enter the key for the following operations:\n");
+                                printf("1.Profile\n2.View Items\n3.View your cart\n4.Add Item\n5.Proceed to pay\n6.Logout\nKey:\t");
+                                scanf("%d",&j);
+                                switch(j){
+                                    case 1: printf("\nDetails:\n");
+                                            display();
+                                            break;
+                                    case 2: printf("Item Name\t\tItem Key\t\tStock\t\tPrice Value\n");
+                                            viewitems(item);
+                                            printf("\n");
+                                            printf("\n\n");
+                                            break;
+                                    case 3: printf("Items in your cart:\n");
+                                            printf("Item Name\t\tQuantity\t\tPrice Value per product\tTotal price\n");
+                                            for(int k=0; k<val; k++){
+                                                purch temp = current->purchase[k];
+                                                printf("%s\t\t%d\t\t%d\t\t%d\n",temp->purchase, temp->number, temp->price, temp->tprice);
+                                            }
+                                            printf("End of cart.\n");
+                                            break;
+                                    case 4: printf("Enter the item key of the product you want to buy:\n");
+                                            scanf("%d", &itemkey);
+                                            flag = searchi(item, itemkey);
+                                            if(flag!=1)
+                                                printf("Invalid item key or item not available.\n\n");
+                                            else
+                                                printf("Item Successfully added to cart\n\n");
+                                            break;
+                                    case 5: printf("Total amount payable");{
+                                            int total = 0;
+                                            printf("Item Name\t\tQuantity\t\tPrice Value per product\tTotal price\n");
+                                            for(int k=0; k<val; k++){
+                                                purch temp = current->purchase[k];
+                                                printf("%s\t%d\t\t%d\t\t%d\n",temp->purchase, temp->number, temp->price, temp->tprice);
+                                                total += temp->tprice;
+                                            }
+                                            printf("Total cost: %d\n",total);}
+                                            payable();
+                                            break;
+                                    case 6: done = 1;
+                                            printf("\e[1;1H\e[2J");
+                                            break;
+                                    default: printf("Invalid Option.\n");
+                                }
+                            }
+                        }
+                    break;
+                    //}
+
+            case 2: printf("Enter your security key:\n");
+                    scanf("%d", &memberkey);
+                    flag = searchc(member, memberkey);
+                    if(flag!=1)
+                        printf("Invalid credentials\n");
+                    else
+                        goto chcc;
+                    break;
+
+            case 3: fdone=1;
+                    break;
+
+            default: printf("Wrong choice. Please enter again.\n"); 
+        }
+    }
+    return 0;
+}
+
+//Function to display useer profile
+void display(){
+    printf("Name:%s\nSecurity Key:%d\nAddress:%s\nPin:%d\nMobile no:%d\nPoints:%d\n\n",current->cust_name,
+                                            current->cust_key, current->address, current->pin, current->mobno, current->points);
+}
+
+//Function to generate random key
+int getid(){
+    return rand();
+}
+
+//Function to proceed payment
+void payable(){
+    int op;
+    printf("Enter your payment method:\n");
+    printf("1.COD\t2.Debit/Credit Card\n");
+    scanf("%d",&op);
+    if(op==1)
+        printf("Placed order successfully.\n");
+    else{
+        char temp[30];
+        int cvv;
+        printf("Enter your card details.\n");
+        printf("Enter your card number(16 digits):\t");
+        scanf("%s", temp);
+        printf("Enter cvv:\t");
+        scanf("%d", &cvv);
+        printf("Completing transaction....\n");
+        printf("Placed order successfully.\n");
+    }
+}
+
+//Function to create a customer node
 cust_NODE createc(cust_NODE mem, int r){
     if(mem==NULL){
         MALLOC(mem, sizeof(struct account), cust_NODE);
         printf("\nEnter the data:\n");
         printf("Enter your name:\t");
         scanf("%s",mem->cust_name);
+        printf("Enter your password:\t");
+        scanf("%s", mem->password);
         printf("Enter your address:\n");
         scanf("%s", mem->address);
         printf("Enter your pin:\t");
@@ -86,6 +248,7 @@ cust_NODE createc(cust_NODE mem, int r){
     return mem;
 }
 
+//Function to create item node
 item_NODE createi(item_NODE ite, int rr){
     if(ite==NULL){
         MALLOC(ite, sizeof(struct item), item_NODE);
@@ -111,6 +274,7 @@ item_NODE createi(item_NODE ite, int rr){
     return ite;
 }
 
+//Function to search for an item
 int searchi(item_NODE ite, int key){
     int q;
     if(ite==NULL)
@@ -139,12 +303,22 @@ int searchi(item_NODE ite, int key){
         return searchi(ite->right, key);
 }
 
+//Function to check for login credentials
 int searchc(cust_NODE cust, int key){
     if(cust==NULL)
         return 0;
     else if(key == cust->cust_key){
-            printf("Logged in Successully!.\n");
-            return 1;
+        char name[30], password[30];
+            printf("Enter your username:\t");
+            scanf("%s", name);
+            printf("Eneter your password:\t");
+            scanf("%s", password);
+            if(strcmp(cust->cust_name, name)==0 && strcmp(cust->password, password)==0){
+                printf("Successfully logged in.\n");
+                return 1;
+            }
+            else
+                return 0;
     }
     else if(key < cust->cust_key)
         return searchc(cust->left, key);
@@ -152,130 +326,11 @@ int searchc(cust_NODE cust, int key){
         return searchc(cust->right, key);
 }
 
-void preorderi(item_NODE ite){
+//Function to view all items in cart
+void viewitems(item_NODE ite){
     if(ite!=NULL){
         printf("%s\t\t\t%d\t\t\t%d\t\t\t%d\n",ite->item_name, ite->item_key, ite->stock, ite->price);
-        preorderi(ite->left);
-        preorderi(ite->right);
+        viewitems(ite->left);
+        viewitems(ite->right);
     }
-}
-
-int main(){
-    int i, j, flag, done=0, pay, fdone=0;
-    cust_NODE member = NULL;
-    item_NODE item = NULL;
-    int itemkey, memberkey;
-    while(!fdone){
-        done=0;
-        ind = 0;
-        val = 0;
-        printf("*--------------------------------------------------------------------------------------------------------------*\n");
-        printf("                                  WELCOME TO ONLINE SHOPPING MART\n");
-        printf("                                                                          Cart=%d\n", cart);
-        printf("\n");
-        printf("Enter the following key: \n1.Signup\n2.Login\n3.Exit\nKey:\t");
-        scanf("%d", &i);
-        switch(i){
-            case 1: printf("Enter the following details:");
-                    member = createc(member, 5467);
-                    printf("Account created successfully.\n\n");
-                    chcc:
-                        if(current->admin==1){
-                            while(!done){
-                                printf("Enter the key for the following operations:\n");
-                                printf("1.Profile\n2.Add Item\n3.Modify Price\n4.View Items\n5.Logout\nKey:\t");
-                                scanf("%d",&j);
-                                switch (j){
-                                    case 1: printf("Details:\n");
-                                            printf("Name:%s\nSecurity Key:%d\nAddress:%s\nPin:%d\nMobile no:%d\nPoints:%d\nadmin:%d\n\n",current->cust_name,
-                                            current->cust_key, current->address, current->pin, current->mobno, current->points, current->admin);
-                                            break;
-                                    case 2: item = createi(item, 5467);
-                                            if(item!=NULL)
-                                                printf("item added successfully\n\n");
-                                            break;
-                                    case 4: printf("Key\t\tItem Name\t\tStock\t\tPrice Value\n");
-                                            preorderi(item);
-                                            break;
-                                    case 5: done = 1;
-                                            printf("\e[1;1H\e[2J");
-                                            break;
-                                    default: printf("Invalid Option.\n");
-                                }
-                            }
-                        }
-                        else{
-                            while(!done){
-                                printf("Enter the key for the following operations:\n");
-                                printf("1.Profile\n2.View Items\n3.View your cart\n4.Add Item\n5.Proceed to pay\n6.Logout\nKey:\t");
-                                scanf("%d",&j);
-                                switch(j){
-                                    case 1: printf("Details:\n");
-                                            printf("Name:%s\nSecurity Key:%d\nAddress:%s\nPin:%d\nMobile no:%d\nPoints:%d\n\n",current->cust_name,
-                                            current->cust_key, current->address, current->pin, current->mobno, current->points);
-                                            break;
-                                    case 2: printf("Item Name\t\tItem Key\t\tStock\t\tPrice Value\n");
-                                            preorderi(item);
-                                            printf("\n\n");
-                                            break;
-                                    case 3: printf("Items in your cart:\n");
-                                            printf("Item Name\t\tQuantity\t\tPrice Value per product\tTotal price\n");
-                                            for(int k=0; k<val; k++){
-                                                purch temp = current->purchase[k];
-                                                printf("%s\t\t%d\t\t%d\t\t%d\n",temp->purchase, temp->number, temp->price, temp->tprice);
-                                            }
-                                            printf("End of cart.\n");
-                                            break;
-                                    case 4: printf("Enter the item key of the product you want to buy:\n");
-                                            scanf("%d", &itemkey);
-                                            flag = searchi(item, itemkey);
-                                            if(flag!=1)
-                                                printf("Invalid item key or item not available.\n\n");
-                                            else
-                                                printf("Item Successfully added to cart\n\n");
-                                            break;
-                                    case 5: printf("Total amount payable");
-                                            int total = 0;
-                                            printf("Item Name\t\tQuantity\t\tPrice Value per product\tTotal price\n");
-                                            for(int k=0; k<val; k++){
-                                                purch temp = current->purchase[k];
-                                                printf("%s\t\t%d\t\t%d\t\t%d\n",temp->purchase, temp->number, temp->price, temp->tprice);
-                                                total += temp->tprice;
-                                            }
-                                            printf("Total cost: %d\n",total);
-                                            printf("Enter your payment method:\n");
-                                            printf("1.COD\t2.Debit/Credit Card\n");
-                                            scanf("%d",&pay);
-                                            if(pay==1)
-                                                printf("Placed order successfully.\n");
-                                            else
-                                                printf("Enter your card details.\n");
-                                            break;
-                                    case 6: done = 1;
-                                            printf("\e[1;1H\e[2J");
-                                            break;
-                                    default: printf("Invalid Option.\n");
-                                }
-                            }
-                        }
-                    break;
-                    //}
-
-            case 2: printf("Enter your security key:\n");
-                    scanf("%d", &memberkey);
-                    flag = searchc(member, memberkey);
-                    if(flag!=1)
-                        printf("Invalid credentials\n");
-                    else
-                        goto chcc;
-                    break;
-
-            case 3: {
-                fdone=1;
-            }
-
-            default: printf("Wrong choice. Please enter again.\n"); 
-        }
-    }
-    return 0;
 }
